@@ -41,10 +41,15 @@ export const db = {
   },
   async update(
     id: Card["id"],
-    { column, title }: Omit<Card, "id">
+    cardUpdate: Partial<Omit<Card, "id">>
   ): Promise<void> {
     const data = await readDb();
-    data[id] = { id, title, column };
+    const card = data[id];
+    if (!card) {
+      throw new Error("Card not found");
+    }
+
+    data[id] = { ...card, ...cardUpdate, id };
     await writeDb(data);
   },
   async find(id: Card["id"]): Promise<Card | undefined> {
