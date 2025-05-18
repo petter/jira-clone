@@ -1,7 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-interface Card {
+export interface Card {
   id: string;
   title: string;
   column: number;
