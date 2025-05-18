@@ -27,7 +27,11 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-4 p-4">
       <h1 className="text-2xl font-bold">Petters Board</h1>
-      <p>Trykk på et kort og bruk piltastene for å flytte kortet</p>
+      <p>Her er arbeidsoppgavene mine.</p>
+      <p>
+        OBS! Ikke flytt så raskt på kortene, det kan hende at de hopper litt
+        rundt da 😬
+      </p>
       <Board columns={columns} onCardMove={moveCard} optimistic />
     </div>
   );
