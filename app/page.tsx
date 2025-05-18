@@ -1,28 +1,8 @@
-"use client";
+import { getColumns } from "./api/get-columns/get-columns";
+import { BoardSection } from "./board-section";
 
-import { useEffect, useState } from "react";
-
-import type { Column } from "./backend-stuff/get-columns";
-import { Board } from "./board";
-
-export default function Home() {
-  const [columns, setColumns] = useState<Array<Column>>([]);
-
-  useEffect(() => {
-    fetch("/api/get-columns")
-      .then((res) => res.json())
-      .then(setColumns);
-  }, []);
-
-  async function moveCard(moveEvent: { cardId: string; moveTo: number }) {
-    await fetch("/api/move-card", {
-      method: "POST",
-      body: JSON.stringify(moveEvent),
-    });
-    fetch("/api/get-columns")
-      .then((res) => res.json())
-      .then(setColumns);
-  }
+export default async function Home() {
+  const columns = await getColumns();
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -32,7 +12,7 @@ export default function Home() {
         OBS! Ikke flytt så raskt på kortene, det kan hende at de hopper litt
         rundt da 😬
       </p>
-      <Board columns={columns} onCardMove={moveCard} optimistic />
+      <BoardSection columns={columns} />
     </div>
   );
 }
