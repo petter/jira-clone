@@ -6,7 +6,7 @@ import { db } from "./db";
 let moveCount = 0;
 export async function moveCard(id: string, to: number): Promise<number> {
   await new Promise((resolve) =>
-    setTimeout(resolve, moveCount % 2 === 0 ? 200 : 1000)
+    setTimeout(resolve, moveCount % 2 === 0 ? 2000 : 6000)
   );
   moveCount++;
   await db.update(id, { column: to });
