@@ -2,6 +2,7 @@
 
 import { startTransition, useState } from "react";
 import { Board } from "./components/board";
+import { moveCardAction } from "./move-card-action";
 import type { Column } from "./api/get-columns/get-columns";
 import type { MoveEvent } from "./backend-stuff/move-card";
 
@@ -14,10 +15,7 @@ export function BoardSection({ columns: initialColumns }: Props) {
 
   async function moveCard(moveEvent: MoveEvent) {
     // Move cards
-    await fetch("/api/move-card", {
-      method: "POST",
-      body: JSON.stringify(moveEvent),
-    });
+    await moveCardAction(moveEvent);
 
     // Update local state after the move is complete
     const updatedColumns = await fetch("/api/get-columns").then((res) =>
