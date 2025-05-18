@@ -5,6 +5,11 @@ import "server-only";
 
 import { db } from "./db";
 
+export interface MoveEvent {
+  cardId: string;
+  moveTo: number;
+}
+
 let moveCount = 0;
 export async function moveCard(id: string, to: number): Promise<number> {
   await new Promise((resolve) =>
