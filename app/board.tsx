@@ -1,5 +1,9 @@
 "use client";
 
+// Please excuse the following code!
+// This is not meant to be consumed by humans and is merely a result of
+// vibe coding and a tight deadline 😅
+
 import { useOptimistic, startTransition } from "react";
 import type { Column } from "./backend-stuff/get-columns";
 
@@ -75,10 +79,48 @@ export function Board({ columns, onCardMove, optimistic = false }: Props) {
               onKeyDown={(e) => {
                 if (e.key === "ArrowRight") {
                   if (index < columns.length - 1) {
+                    if (optimistic) {
+                      startTransition(() => {
+                        setOptimisticColumns((currentColumns) => {
+                          const newColumns = [...currentColumns];
+                          const sourceColumn = newColumns[index];
+                          const cardIndex = sourceColumn.cards.findIndex(
+                            (c) => c.id === card.id
+                          );
+                          if (cardIndex === -1) return currentColumns;
+
+                          const [movedCard] = sourceColumn.cards.splice(
+                            cardIndex,
+                            1
+                          );
+                          newColumns[index + 1].cards.push(movedCard);
+                          return newColumns;
+                        });
+                      });
+                    }
                     onCardMove({ cardId: card.id, moveTo: index + 1 });
                   }
                 } else if (e.key === "ArrowLeft") {
                   if (index > 0) {
+                    if (optimistic) {
+                      startTransition(() => {
+                        setOptimisticColumns((currentColumns) => {
+                          const newColumns = [...currentColumns];
+                          const sourceColumn = newColumns[index];
+                          const cardIndex = sourceColumn.cards.findIndex(
+                            (c) => c.id === card.id
+                          );
+                          if (cardIndex === -1) return currentColumns;
+
+                          const [movedCard] = sourceColumn.cards.splice(
+                            cardIndex,
+                            1
+                          );
+                          newColumns[index - 1].cards.push(movedCard);
+                          return newColumns;
+                        });
+                      });
+                    }
                     onCardMove({ cardId: card.id, moveTo: index - 1 });
                   }
                 }
