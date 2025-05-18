@@ -70,65 +70,67 @@ export function Board({ columns, onCardMove, optimistic = false }: Props) {
           onDrop={(e) => handleDrop(e, index)}
         >
           <h2 className="text-lg font-bold">{column.name}</h2>
-          {column.cards.map((card) => (
-            <button
-              key={card.id}
-              className="rounded-md bg-white p-2 focus:bg-green-100 text-start cursor-move"
-              draggable
-              onDragStart={(e) => handleDragStart(e, card.id)}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowRight") {
-                  if (index < columns.length - 1) {
-                    if (optimistic) {
-                      startTransition(() => {
-                        setOptimisticColumns((currentColumns) => {
-                          const newColumns = [...currentColumns];
-                          const sourceColumn = newColumns[index];
-                          const cardIndex = sourceColumn.cards.findIndex(
-                            (c) => c.id === card.id
-                          );
-                          if (cardIndex === -1) return currentColumns;
+          {[...column.cards]
+            .sort((a, b) => a.id.localeCompare(b.id))
+            .map((card) => (
+              <button
+                key={card.id}
+                className="rounded-md bg-white p-2 focus:bg-green-100 text-start cursor-move"
+                draggable
+                onDragStart={(e) => handleDragStart(e, card.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowRight") {
+                    if (index < columns.length - 1) {
+                      if (optimistic) {
+                        startTransition(() => {
+                          setOptimisticColumns((currentColumns) => {
+                            const newColumns = [...currentColumns];
+                            const sourceColumn = newColumns[index];
+                            const cardIndex = sourceColumn.cards.findIndex(
+                              (c) => c.id === card.id
+                            );
+                            if (cardIndex === -1) return currentColumns;
 
-                          const [movedCard] = sourceColumn.cards.splice(
-                            cardIndex,
-                            1
-                          );
-                          newColumns[index + 1].cards.push(movedCard);
-                          return newColumns;
+                            const [movedCard] = sourceColumn.cards.splice(
+                              cardIndex,
+                              1
+                            );
+                            newColumns[index + 1].cards.push(movedCard);
+                            return newColumns;
+                          });
                         });
-                      });
+                      }
+                      onCardMove({ cardId: card.id, moveTo: index + 1 });
                     }
-                    onCardMove({ cardId: card.id, moveTo: index + 1 });
-                  }
-                } else if (e.key === "ArrowLeft") {
-                  if (index > 0) {
-                    if (optimistic) {
-                      startTransition(() => {
-                        setOptimisticColumns((currentColumns) => {
-                          const newColumns = [...currentColumns];
-                          const sourceColumn = newColumns[index];
-                          const cardIndex = sourceColumn.cards.findIndex(
-                            (c) => c.id === card.id
-                          );
-                          if (cardIndex === -1) return currentColumns;
+                  } else if (e.key === "ArrowLeft") {
+                    if (index > 0) {
+                      if (optimistic) {
+                        startTransition(() => {
+                          setOptimisticColumns((currentColumns) => {
+                            const newColumns = [...currentColumns];
+                            const sourceColumn = newColumns[index];
+                            const cardIndex = sourceColumn.cards.findIndex(
+                              (c) => c.id === card.id
+                            );
+                            if (cardIndex === -1) return currentColumns;
 
-                          const [movedCard] = sourceColumn.cards.splice(
-                            cardIndex,
-                            1
-                          );
-                          newColumns[index - 1].cards.push(movedCard);
-                          return newColumns;
+                            const [movedCard] = sourceColumn.cards.splice(
+                              cardIndex,
+                              1
+                            );
+                            newColumns[index - 1].cards.push(movedCard);
+                            return newColumns;
+                          });
                         });
-                      });
+                      }
+                      onCardMove({ cardId: card.id, moveTo: index - 1 });
                     }
-                    onCardMove({ cardId: card.id, moveTo: index - 1 });
                   }
-                }
-              }}
-            >
-              {card.title}
-            </button>
-          ))}
+                }}
+              >
+                {card.title}
+              </button>
+            ))}
         </div>
       ))}
     </div>
