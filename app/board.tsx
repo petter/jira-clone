@@ -28,108 +28,70 @@ export function Board({ columns, onCardMove, optimistic = false }: Props) {
     e.preventDefault();
     const cardId = e.dataTransfer.getData("text/plain");
 
-    if (optimistic) {
-      // Create optimistic update by moving the card in the local state
-      startTransition(() => {
-        setOptimisticColumns((currentColumns) => {
-          const newColumns = [...currentColumns];
-          // Find the source column and card
-          const sourceColumnIndex = newColumns.findIndex((col) =>
-            col.cards.some((card) => card.id === cardId)
-          );
-          if (sourceColumnIndex === -1) return currentColumns;
-
-          const sourceColumn = newColumns[sourceColumnIndex];
-          const cardIndex = sourceColumn.cards.findIndex(
-            (card) => card.id === cardId
-          );
-          if (cardIndex === -1) return currentColumns;
-
-          // Remove card from source column
-          const [movedCard] = sourceColumn.cards.splice(cardIndex, 1);
-          // Add card to target column
-          newColumns[targetColumnIndex].cards.push(movedCard);
-
-          return newColumns;
+    // Create optimistic update by moving the card in the local state
+    startTransition(() => {
+      setOptimisticColumns((currentColumns) => {
+        const card = currentColumns
+          .flatMap((col) => col.cards)
+          .find((card) => card.id === cardId);
+        return currentColumns.map((col, index) => {
+          const newCards = col.cards.filter((card) => card.id !== cardId);
+          if (index === targetColumnIndex) {
+            newCards.push(card!);
+          }
+          return {
+            ...col,
+            cards: newCards,
+          };
         });
       });
-    }
-
+    });
     onCardMove({ cardId, moveTo: targetColumnIndex });
   };
 
   const displayColumns = optimistic ? optimisticColumns : columns;
 
+  const isCardPositionOptimistic = (cardId: string) => {
+    // Find the card's position in the actual columns
+    const actualColumnIndex = columns.findIndex((col) =>
+      col.cards.some((card) => card.id === cardId)
+    );
+
+    // Find the card's position in the optimistic columns
+    const optimisticColumnIndex = optimisticColumns.findIndex((col) =>
+      col.cards.some((card) => card.id === cardId)
+    );
+
+    // Card is in an optimistic state if its position in the optimistic columns
+    // is different from its position in the actual columns
+    return actualColumnIndex !== optimisticColumnIndex;
+  };
+
   return (
     <div className="flex gap-4 h-[80vh]">
-      {displayColumns.map((column, index) => (
+      {displayColumns.map((column, colIndex) => (
         <div
-          key={index}
+          key={colIndex}
           className="flex flex-col gap-2 bg-slate-200 p-2 max-w-64 w-full h-full rounded"
           onDragOver={handleDragOver}
-          onDrop={(e) => handleDrop(e, index)}
+          onDrop={(e) => handleDrop(e, colIndex)}
         >
           <h2 className="text-lg font-bold">{column.name}</h2>
           {[...column.cards]
             .sort((a, b) => a.id.localeCompare(b.id))
             .map((card) => (
-              <button
+              <div
                 key={card.id}
-                className="rounded-md bg-white p-2 focus:bg-green-100 text-start cursor-move"
+                className={`rounded-md p-2 text-start cursor-move ${
+                  isCardPositionOptimistic(card.id)
+                    ? "bg-amber-200"
+                    : "bg-white"
+                }`}
                 draggable
                 onDragStart={(e) => handleDragStart(e, card.id)}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowRight") {
-                    if (index < columns.length - 1) {
-                      if (optimistic) {
-                        startTransition(() => {
-                          setOptimisticColumns((currentColumns) => {
-                            const newColumns = [...currentColumns];
-                            const sourceColumn = newColumns[index];
-                            const cardIndex = sourceColumn.cards.findIndex(
-                              (c) => c.id === card.id
-                            );
-                            if (cardIndex === -1) return currentColumns;
-
-                            const [movedCard] = sourceColumn.cards.splice(
-                              cardIndex,
-                              1
-                            );
-                            newColumns[index + 1].cards.push(movedCard);
-                            return newColumns;
-                          });
-                        });
-                      }
-                      onCardMove({ cardId: card.id, moveTo: index + 1 });
-                    }
-                  } else if (e.key === "ArrowLeft") {
-                    if (index > 0) {
-                      if (optimistic) {
-                        startTransition(() => {
-                          setOptimisticColumns((currentColumns) => {
-                            const newColumns = [...currentColumns];
-                            const sourceColumn = newColumns[index];
-                            const cardIndex = sourceColumn.cards.findIndex(
-                              (c) => c.id === card.id
-                            );
-                            if (cardIndex === -1) return currentColumns;
-
-                            const [movedCard] = sourceColumn.cards.splice(
-                              cardIndex,
-                              1
-                            );
-                            newColumns[index - 1].cards.push(movedCard);
-                            return newColumns;
-                          });
-                        });
-                      }
-                      onCardMove({ cardId: card.id, moveTo: index - 1 });
-                    }
-                  }
-                }}
               >
                 {card.title}
-              </button>
+              </div>
             ))}
         </div>
       ))}
